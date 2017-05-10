@@ -13,6 +13,9 @@ struct MyData {
     GLuint mVertSize;
     GLuint VBO;
     GLuint VAO;
+    GLuint* mIndexes;
+    GLuint mIndexSize;
+    GLuint EBO;
     GLuint mShaderProgram;
 };
 MyData sData;
@@ -34,9 +37,15 @@ static void* getUserData() {
 }
 
 static GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+         0.5f,  0.5f, 0.0f, // top right
+         0.5f, -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f  // top left
+};
+
+static GLuint indices[] = {
+        0, 1, 3, // fst tri
+        1, 2, 3  // snd tri
 };
 
 static const char* vertShaderSource =""
@@ -71,13 +80,18 @@ static int onInit(void* userData) {
     MyData& d = *(MyData*)userData;
     d.mVertices = vertices;
     d.mVertSize = sizeof(vertices);
+    d.mIndexes = indices;
+    d.mIndexSize = sizeof(indices);
 
     glGenBuffers(1, &d.VBO);
+    glGenBuffers(1, &d.EBO);
     glGenVertexArrays(1, &d.VAO);
 
     glBindVertexArray(d.VAO);
     glBindBuffer(GL_ARRAY_BUFFER, d.VBO);
     glBufferData(GL_ARRAY_BUFFER, d.mVertSize, d.mVertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, d.EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, d.mIndexSize, d.mIndexes, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
@@ -110,6 +124,8 @@ static int onInit(void* userData) {
     glDeleteShader(vertShader);
     glDeleteShader(fragShader);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);// GL_LINE
+
     return 1;
 }
 
@@ -117,7 +133,7 @@ static int onRender(void* userData) {
     MyData& d = *(MyData*)userData;
     glUseProgram(d.mShaderProgram);
     glBindVertexArray(d.VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     return 1;
 }
