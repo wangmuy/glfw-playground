@@ -7,12 +7,12 @@
 
 #include <GLFW/glfw3.h>
 
-typedef struct ImplBase {
+typedef struct ImplCallback {
     void* (*getUserData)();
     void (*setWindow)(GLFWwindow* window, void* userData);
     int (*onInit)(void* userData);
     int (*onRender)(void* userData);
-    void (*onKeyCallback)(GLFWwindow* window, int key, int scancode, int action, int mode);
-} ImplBase;
+    void (*onKeyCallback)(GLFWwindow* window, int key, int scancode, int action, int mode, void* userData);
+} ImplCallback;
 
 #endif //GLITTER_GLFWIMPLBASE_H

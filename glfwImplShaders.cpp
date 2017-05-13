@@ -24,7 +24,7 @@ static void setWindow(GLFWwindow* window, void* userData);
 static int onInit(void* userData);
 static int onRender(void* userData);
 static void onKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode, void* userData);
-ImplCallback g_implHelloTriangle = {getUserData, setWindow, onInit, onRender, onKeyCallback};
+ImplCallback g_implShaders = {getUserData, setWindow, onInit, onRender, onKeyCallback};
 
 static void setWindow(GLFWwindow* window, void* userData) {
     MyData& d = *(MyData*)userData;
@@ -50,16 +50,19 @@ static GLuint indices[] = {
 static const char* vertShaderSource =""
         "#version 330 core\n"
         "layout (location=0) in vec3 position;\n"
+        "out vec4 vertexColor;\n"
         "void main() {\n"
-        "  gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+        "  gl_Position = vec4(position, 1.0);\n"
+        "vertexColor = vec4(0.5f, 0.0f, 0.0f, 1.0f);\n"
         "}\n"
 "\n";
 
 static const char* fragShaderSource =""
         "#version 330 core\n"
+        "in vec4 vertexColor;\n"
         "out vec4 color;\n"
         "void main() {\n"
-        "  color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "  color = vertexColor; //vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
         "}\n"
 "\n";
 
