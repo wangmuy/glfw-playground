@@ -12,6 +12,8 @@
 #include "glfwImplBase.h"
 #include "glfwImplShader.h"
 
+#define RES_DIR "../../Glitter/Sources/impl/res/"
+
 struct MyData {
     GLFWwindow* mWindow;
     GLfloat* mVertices;
@@ -139,8 +141,8 @@ static int onInit(void* userData) {
     glDeleteShader(vertShader);
     glDeleteShader(fragShader);
 
-//    d.mShaderProgram = GLFWImpl::Shader("../../Glitter/Sources/impl/shader_v.shader",
-//                                        "../../Glitter/Sources/impl/shader_f.shader").Program;
+//    d.mShaderProgram = GLFWImpl::Shader(RES_DIR "shader_v.shader",
+//                                        RES_DIR "shader_f.shader").Program;
 
     d.mVertexColorLocation = glGetUniformLocation(d.mShaderProgram, "ourColor");
 
