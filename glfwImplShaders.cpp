@@ -170,36 +170,45 @@ static void onKeyCallback(GLFWwindow* window, int key, int scancode, int action,
 
 // Shader class
 
-GLFWImpl::Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
+GLFWImpl::Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const bool isPath) : ready(false)
 {
-    std::string vertexCode;
-    std::string fragmentCode;
-    std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
-    // ensure ifstream objects can throw exceptions
-    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try
-    {
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
-        vShaderFile.close();
-        fShaderFile.close();
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
-    } catch(std::ifstream::failure e)
-    {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+    const GLchar* vShaderCode = vertexPath;
+    const GLchar* fShaderCode = fragmentPath;
+    if(isPath) {
+        std::string vertexCode;
+        std::string fragmentCode;
+        std::ifstream vShaderFile;
+        std::ifstream fShaderFile;
+        // ensure ifstream objects can throw exceptions
+        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try {
+            vShaderFile.open(vertexPath);
+            fShaderFile.open(fragmentPath);
+            std::stringstream vShaderStream, fShaderStream;
+            vShaderStream << vShaderFile.rdbuf();
+            fShaderStream << fShaderFile.rdbuf();
+            vShaderFile.close();
+            fShaderFile.close();
+            vertexCode = vShaderStream.str();
+            fragmentCode = fShaderStream.str();
+        } catch (std::ifstream::failure e) {
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+        }
+        vShaderCode = vertexCode.c_str();
+        fShaderCode = fragmentCode.c_str();
     }
 
-    const GLchar* vShaderCode = vertexCode.c_str();
-    const GLchar* fShaderCode = fragmentCode.c_str();
+    init(vShaderCode, fShaderCode);
+}
+
+bool GLFWImpl::Shader::init(const GLchar* vShaderCode, const GLchar* fShaderCode) {
     GLuint vertex, fragment;
-    GLint success;
+    GLint success = 0;
     GLchar infoLog[512];
+
+    if(vShaderCode == NULL || fShaderCode == NULL)
+        return false;
 
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
@@ -234,6 +243,9 @@ GLFWImpl::Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+
+    ready = success > 0;
+    return ready;
 }
 
 void GLFWImpl::Shader::Use()

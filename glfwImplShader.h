@@ -12,10 +12,13 @@ namespace GLFWImpl
     class Shader {
     public:
         GLuint Program;
+        bool ready;
 
-        Shader(const GLchar *vertexPath, const GLchar *fragmentPath);
+        Shader(const GLchar *vertexPath, const GLchar *fragmentPath, const bool isPath=false);
 
         void Use();
+
+        bool init(const GLchar* vShaderCode, const GLchar* fShaderCode);
     };
 }
 

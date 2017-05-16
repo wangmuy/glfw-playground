@@ -168,9 +168,9 @@ static int onInit(void* userData) {
     glGenBuffers(1, &d.EBO);
     glGenVertexArrays(1, &d.VAO);
 
-    glBindVertexArray(d.VAO);
     glBindBuffer(GL_ARRAY_BUFFER, d.VBO);
     glBufferData(GL_ARRAY_BUFFER, d.mVertSize, d.mVertices, GL_STATIC_DRAW);
+    glBindVertexArray(d.VAO);
     // position attrib
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
@@ -400,7 +400,8 @@ static void onScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 /***** Class *****/
 // Constructor with vectors
 GLFWImpl::Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch)
-        : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+        : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(MOVESENSITIVTY),
+          ScrollSensitivity(SCROLLSENSITIIVTY), Zoom(ZOOM)
 {
     this->Position = position;
     this->WorldUp = up;
@@ -412,7 +413,8 @@ GLFWImpl::Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat 
 // Constructor with scalar values
 GLFWImpl::Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ,
                          GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)
-        : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+        : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(MOVESENSITIVTY),
+          ScrollSensitivity(SCROLLSENSITIIVTY), Zoom(ZOOM)
 {
     this->Position = glm::vec3(posX, posY, posZ);
     this->WorldUp = glm::vec3(upX, upY, upZ);
@@ -468,7 +470,7 @@ void GLFWImpl::Camera::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GL
 void GLFWImpl::Camera::ProcessMouseScroll(GLfloat yoffset)
 {
     if (this->Zoom >= 1.0f && this->Zoom <= 45.0f)
-        this->Zoom -= yoffset;
+        this->Zoom -= yoffset*ScrollSensitivity;
     if (this->Zoom <= 1.0f)
         this->Zoom = 1.0f;
     if (this->Zoom >= 45.0f)
