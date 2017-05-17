@@ -1,0 +1,93 @@
+// Local Headers
+#include "glitter.hpp"
+
+// System Headers
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+// Standard Headers
+#include <cstdio>
+#include <cstdlib>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#include "impl/glfwImplBase.h"
+
+extern ImplCallback g_implHelloTriangle;
+extern ImplCallback g_implShaders;
+extern ImplCallback g_implTextures;
+extern ImplCallback g_implTransformations;
+extern ImplCallback g_implCoordinateSystems;
+extern ImplCallback g_implCamera;
+extern ImplCallback g_implColors;
+extern ImplCallback g_implBasicLighting;
+
+static ImplCallback* sCallback = &g_implBasicLighting;
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+    if(sCallback != nullptr && sCallback->onKeyCallback != nullptr) {
+        void* userData = sCallback->getUserData != nullptr? sCallback->getUserData() : nullptr;
+        sCallback->onKeyCallback(window, key, scancode, action, mode, userData);
+    }
+}
+
+int main(int argc, char * argv[]) {
+
+    // Load GLFW and Create a Window
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
+
+    // Check for Valid Context
+    if (mWindow == nullptr) {
+        fprintf(stderr, "Failed to Create OpenGL Context");
+        return EXIT_FAILURE;
+    }
+
+    // Create Context and Load OpenGL Functions
+    glfwMakeContextCurrent(mWindow);
+    gladLoadGL();
+    fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
+
+    int w, h;
+    glfwGetFramebufferSize(mWindow, &w, &h);
+    fprintf(stderr, "width=%d, height=%d\n", w, h);
+    glViewport(0, 0, w, h);
+    glfwSetKeyCallback(mWindow, key_callback);
+
+    void* userData = sCallback->getUserData != nullptr? sCallback->getUserData() : nullptr;
+    if(sCallback != nullptr && sCallback->setWindow != nullptr) {
+        sCallback->setWindow(mWindow, userData);
+    }
+
+    if(sCallback != nullptr && sCallback->onInit != nullptr) {
+        sCallback->onInit(userData);
+    }
+
+    // Rendering Loop
+    while (glfwWindowShouldClose(mWindow) == false) {
+
+        // Background Fill Color
+        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if(sCallback != nullptr && sCallback->onRender != nullptr) {
+            sCallback->onRender(userData);
+        }
+
+        // Flip Buffers and Draw
+        glfwSwapBuffers(mWindow);
+        glfwPollEvents();
+    }
+
+    glfwTerminate();
+    return EXIT_SUCCESS;
+}
